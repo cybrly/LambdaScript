@@ -9,7 +9,7 @@ python3 -m venv venv
 source venv/bin/activate
 pip3 install -r requirements.txt
 
-vim lambda.py and enter in your API key.
+vim lambda.py, enter in your API key, and replace "Chris" with the name of your SSH key from the Lambda Labs dashboard.
 ```
 
 # Usage
