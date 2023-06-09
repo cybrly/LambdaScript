@@ -8,14 +8,16 @@ cd LambdaScript
 python3 -m venv venv
 source venv/bin/activate
 pip3 install -r requirements.txt
+
+vim lambda.py and enter in your API key.
 ```
 
-Usage
+# Usage
 ```
 python3 lambda.py -h                                                                                                                                 ─╯
 
     USAGE:
-        python script_name.py [COMMAND] [ARGUMENT]
+        python lambda.py [COMMAND] [ARGUMENT]
 
     COMMANDS:
         check               Check the status of running instances.
