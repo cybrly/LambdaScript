@@ -1,5 +1,5 @@
 # Lambda Script
-Command line app to interact with Lambda Labs GPUs
+Unofficial command line app to interact with Lambda Labs GPUs via their official API.  Visit https://lambdalabs.com/ to sign-up and get your own API key. This script will not work without it.
 
 # Installation
 ```
