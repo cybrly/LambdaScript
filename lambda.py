@@ -3,7 +3,7 @@ import json
 import sys
 
 API_URL = "https://cloud.lambdalabs.com/api/v1/"
-AUTH_TOKEN = "API_KEY_HERE"
+AUTH_TOKEN = "AUTH_KEY_HERE"
 
 def print_in_color(text, color_code):
     print(f"\033[{color_code}m{text}\033[0m")
@@ -20,12 +20,12 @@ def get_available_instances():
 def start_instance(number):
     gpu_dict = get_available_instances()
     if number not in gpu_dict:
-        print("No GPU corresponds to the number. Please list GPUs first.")
+        print("No GPU corresponds to that number. Please list GPUs first.")
         sys.exit(1)
     data = {
         "region_name": gpu_dict[number]["region"],
         "instance_type_name": gpu_dict[number]["name"],
-        "ssh_key_names": ["Chris"]
+        "ssh_key_names": ["SSH_KEY_HERE"]
     }
     response = requests.post(API_URL + "instance-operations/launch", headers={"Authorization": f"Bearer {AUTH_TOKEN}"}, json=data)
     if response.status_code == 200:
@@ -51,16 +51,16 @@ def check_running_instances():
     response = requests.get(API_URL + "instances", headers={"Authorization": f"Bearer {AUTH_TOKEN}"})
     data = response.json()["data"]
     if not data:
-        print_in_color("There are no GPUs currently running.", "1;31")
+        print("\033[1;31;40m There are no instances currently running. \n")
         return
 
     for instance in data:
         if instance['status'] == 'active':
             instance_type = instance['instance_type']['name']
-            if instance_type.startswith("gpu_8x"):
-                print_in_color(f"Instance ID: {instance['id']}, Instance Type: {instance_type}, Status: {instance['status']}", "1;32")
-            else:
-                print(f"Instance ID: {instance['id']}, Instance Type: {instance_type}, Status: {instance['status']}")
+            print("\033[1;34;40m Instance ID: \033[0m" + instance['id'] + "\n" +
+                  "\033[1;34;40m Instance Type: \033[0m" + instance_type + "\n" +
+                  "\033[1;34;40m IP Address: \033[0m" + instance['ip'] + "\n" +
+                  "\033[1;34;40m Status: \033[1;32;40m" + instance['status'] + "\n")
 
 def print_help_menu():
     help_text = """
