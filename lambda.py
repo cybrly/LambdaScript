@@ -37,7 +37,7 @@ def start_instance(number):
     data = {
         "region_name": gpu_dict[number]["region"],
         "instance_type_name": gpu_dict[number]["name"],
-        "ssh_key_names": ["SSH_NAME"]
+        "ssh_key_names": ["SSH_NAME_HERE"]
     }
     response = requests.post(API_URL + "instance-operations/launch", headers={"Authorization": f"Bearer {AUTH_TOKEN}"}, json=data)
     if response.status_code == 200:
@@ -68,12 +68,12 @@ def check_running_instances():
 
     for instance in data:
         if instance['status'] == 'active':
-            instance_type = instance['instance_type']['name']
-            print("\n" +
-                  "\033[1;34;40m Instance ID: \033[0m" + instance['id'] + "\n" +
-                  "\033[1;34;40m Instance Type: \033[0m" + instance_type + "\n" +
-                  "\033[1;34;40m IP Address: \033[0m" + instance['ip'] + "\n" +
-                  "\033[1;34;40m Status: \033[1;32;40m" + instance['status'] + "\n")
+            instance_type = ' '.join(part.capitalize() for part in instance['instance_type']['name'].replace('gpu_', '').split('_'))
+            print("\n\033[1;34;40m Instance ID: \033[0m" + instance['id'],
+                  "\033[1;34;40m Instance Type: \033[0m" + instance_type,
+                  "\033[1;34;40m IP Address: \033[0m" + instance['ip'],
+                  "\033[1;34;40m Status: \033[1;32;40m" + instance['status'] + "\n", sep='\n')
+
 
 def print_help_menu():
     help_text = """
