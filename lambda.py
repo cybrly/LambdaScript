@@ -60,9 +60,11 @@ def stop_instance(instance_id):
 
     response = requests.post(url, headers=headers, data=json.dumps(payload))
     if response.status_code == 200:
-        print("Instance terminated successfully.")
+        print("\033[1;32mInstance terminated successfully.\033[0m")
     else:
-        print(f"Failed to terminate instance. Error: {response.text}")
+        error_code = response.json()["error"]["code"]
+        print(f"\033[1;31mFailed to terminate instance. Error Message: {error_code}\033[0m")
+
 
 def check_running_instances():
     response = requests.get(API_URL + "instances", headers={"Authorization": f"Bearer {AUTH_TOKEN}"})
