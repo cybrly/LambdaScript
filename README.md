@@ -12,7 +12,7 @@ source venv/bin/activate
 pip3 install -r requirements.txt
 ```
 
-Create .env file:
+Update .env file:
 ```
 AUTH_TOKEN="your_token"
 SSH_KEY_NAMES="your_key_names"
