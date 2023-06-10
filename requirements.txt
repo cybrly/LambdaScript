@@ -1,2 +1,4 @@
-requests==2.26.0
+requests
+json
+python-dotenv
 

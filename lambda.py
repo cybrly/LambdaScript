@@ -1,9 +1,14 @@
 import requests
 import json
 import sys
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+AUTH_TOKEN = os.getenv('AUTH_TOKEN')
+SSH_KEY_NAMES = os.getenv('ssh_key_names')
 
 API_URL = "https://cloud.lambdalabs.com/api/v1/"
-AUTH_TOKEN = "API_KEY_HERE"
 
 def print_in_color(text, color_code):
     print(f"\033[{color_code}m{text}\033[0m")
@@ -37,7 +42,7 @@ def start_instance(number):
     data = {
         "region_name": gpu_dict[number]["region"],
         "instance_type_name": gpu_dict[number]["name"],
-        "ssh_key_names": ["SSH_NAME_HERE"]
+        "ssh_key_names": os.getenv('SSH_KEY_NAMES')
     }
     response = requests.post(API_URL + "instance-operations/launch", headers={"Authorization": f"Bearer {AUTH_TOKEN}"}, json=data)
     if response.status_code == 200:
