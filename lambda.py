@@ -3,6 +3,10 @@ import json
 import sys
 import os
 from dotenv import load_dotenv
+from colorama import Fore, Back, Style
+
+def colored_print(text, color):
+    print(f"{color}{text}{Style.RESET_ALL}")
 
 load_dotenv()
 AUTH_TOKEN = os.getenv('AUTH_TOKEN')
@@ -16,39 +20,55 @@ def print_in_color(text, color_code):
 def get_available_instances():
     response = requests.get(API_URL + "instance-types", headers={"Authorization": f"Bearer {AUTH_TOKEN}"})
     data = response.json()["data"]
-    available_instances = []
+    available_instances = {}
     unavailable_instances = []
     for idx, (instance_type, instance_info) in enumerate(data.items(), start=1):
         formatted_instance_type = ' '.join(part.capitalize() for part in instance_type.replace('gpu_', '').split('_'))
         if instance_info["regions_with_capacity_available"]:
             if '8x' in instance_type:
-                formatted_instance_type = f"\033[1;32m{formatted_instance_type}\033[0m"  # bold green
-            available_instances.append(f"{idx}. {formatted_instance_type}")
+                formatted_instance_type = f"{Fore.GREEN}{formatted_instance_type}{Style.RESET_ALL}"
+            available_instances[idx] = {
+                "name": instance_type,
+                "region": next(iter(instance_info["regions_with_capacity_available"]), 'us-west-2')
+            }
         else:
             unavailable_instances.append(f"{idx}. {formatted_instance_type}")
             
-    print_in_color("\nAvailable", "1;32")
-    for instance in available_instances:
-        print(instance)
-    print_in_color("\nUnavailable", "1;31")
+    colored_print("\nAvailable", Fore.GREEN)
+    for number, info in available_instances.items():
+        print(f"{number}. {info['name']}")
+    colored_print("\nUnavailable", Fore.RED)
     for instance in unavailable_instances:
         print(instance)
+    
+    return available_instances
+
+
+def get_instance_info(number):
+    response = requests.get(API_URL + "instance-types", headers={"Authorization": f"Bearer {AUTH_TOKEN}"})
+    data = response.json()["data"]
+    instance_info = list(data.items())[number-1]  # Use number-1 to get the correct index
+    instance_type = instance_info[0]
+    instance_region = next(iter(instance_info[1]["regions_with_capacity_available"]), None)
+    return {"name": instance_type, "region": instance_region}
 
 def start_instance(number):
-    gpu_dict = get_available_instances()
-    if number not in gpu_dict:
-        print("No GPU corresponds to that number. Please list GPUs first.")
+    gpu_info = get_instance_info(number)
+    if not gpu_info["region"]:
+        colored_print("The selected instance does not have an available region.", Fore.RED)
         sys.exit(1)
     data = {
-        "region_name": gpu_dict[number]["region"],
-        "instance_type_name": gpu_dict[number]["name"],
-        "ssh_key_names": os.getenv('SSH_KEY_NAMES')
+        "region_name": str(gpu_info["region"]["name"]),
+        "instance_type_name": gpu_info["name"],
+        "ssh_key_names": os.getenv('SSH_KEY_NAMES').split(',')
     }
     response = requests.post(API_URL + "instance-operations/launch", headers={"Authorization": f"Bearer {AUTH_TOKEN}"}, json=data)
     if response.status_code == 200:
-        print_in_color("GPU instance started successfully.", "1;32")
+        colored_print("GPU instance started successfully.", Fore.GREEN)
     else:
-        print("Failed to start GPU instance.")
+        error_response = response.json()
+        colored_print(f"Failed to start GPU instance. Error Code: {error_response['error']['code']}, Error Message: {error_response['error']['message']}", Fore.RED)
+
 
 def stop_instance(instance_id):
     url = API_URL + "instance-operations/terminate"
