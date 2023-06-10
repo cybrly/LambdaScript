@@ -3,7 +3,7 @@ import json
 import sys
 
 API_URL = "https://cloud.lambdalabs.com/api/v1/"
-AUTH_TOKEN = "AUTH_KEY_HERE"
+AUTH_TOKEN = "API_KEY_HERE"
 
 def print_in_color(text, color_code):
     print(f"\033[{color_code}m{text}\033[0m")
@@ -11,11 +11,23 @@ def print_in_color(text, color_code):
 def get_available_instances():
     response = requests.get(API_URL + "instance-types", headers={"Authorization": f"Bearer {AUTH_TOKEN}"})
     data = response.json()["data"]
-    gpu_dict = {}
-    for number, gpu in enumerate(data, start=1):
-        if data[gpu]["regions_with_capacity_available"]:
-            gpu_dict[number] = {"name": data[gpu]["instance_type"]["name"], "region": data[gpu]["regions_with_capacity_available"][0]["name"]}
-    return gpu_dict
+    available_instances = []
+    unavailable_instances = []
+    for idx, (instance_type, instance_info) in enumerate(data.items(), start=1):
+        formatted_instance_type = ' '.join(part.capitalize() for part in instance_type.replace('gpu_', '').split('_'))
+        if instance_info["regions_with_capacity_available"]:
+            if '8x' in instance_type:
+                formatted_instance_type = f"\033[1;32m{formatted_instance_type}\033[0m"  # bold green
+            available_instances.append(f"{idx}. {formatted_instance_type}")
+        else:
+            unavailable_instances.append(f"{idx}. {formatted_instance_type}")
+            
+    print_in_color("\nAvailable", "1;32")
+    for instance in available_instances:
+        print(instance)
+    print_in_color("\nUnavailable", "1;31")
+    for instance in unavailable_instances:
+        print(instance)
 
 def start_instance(number):
     gpu_dict = get_available_instances()
@@ -25,7 +37,7 @@ def start_instance(number):
     data = {
         "region_name": gpu_dict[number]["region"],
         "instance_type_name": gpu_dict[number]["name"],
-        "ssh_key_names": ["SSH_KEY_HERE"]
+        "ssh_key_names": ["SSH_NAME"]
     }
     response = requests.post(API_URL + "instance-operations/launch", headers={"Authorization": f"Bearer {AUTH_TOKEN}"}, json=data)
     if response.status_code == 200:
@@ -57,7 +69,8 @@ def check_running_instances():
     for instance in data:
         if instance['status'] == 'active':
             instance_type = instance['instance_type']['name']
-            print("\033[1;34;40m Instance ID: \033[0m" + instance['id'] + "\n" +
+            print("\n" +
+                  "\033[1;34;40m Instance ID: \033[0m" + instance['id'] + "\n" +
                   "\033[1;34;40m Instance Type: \033[0m" + instance_type + "\n" +
                   "\033[1;34;40m IP Address: \033[0m" + instance['ip'] + "\n" +
                   "\033[1;34;40m Status: \033[1;32;40m" + instance['status'] + "\n")
@@ -95,12 +108,7 @@ if __name__ == "__main__":
             sys.exit(1)
         stop_instance(sys.argv[2])
     elif command == "list":
-        gpu_dict = get_available_instances()
-        if not gpu_dict:
-            print_in_color("There are no GPUs currently available. Please try again later.", "1;31")
-            sys.exit(0)
-        for number in gpu_dict:
-            print(f"{number}. {gpu_dict[number]['name']}")
+        get_available_instances()
     else:
         print(f"Unknown command: {command}. Use 'check', 'start', 'stop' or 'list'")
         sys.exit(1)
