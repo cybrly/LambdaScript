@@ -2,6 +2,8 @@
 Unofficial command line app to interact with Lambda Labs official API.  Visit https://lambdalabs.com/ to sign-up and get your own API key. This script will not work without it.
 
 # Installation
+
+Download repo and install requirements:
 ```
 git clone https://github.com/cybrly/LambdaScript.git
 cd LambdaScript
@@ -10,7 +12,7 @@ source venv/bin/activate
 pip3 install -r requirements.txt
 ```
 
-Create .env file
+Create .env file:
 ```
 AUTH_TOKEN="your_token"
 SSH_KEY_NAMES="your_key_names"
