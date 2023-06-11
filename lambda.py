@@ -29,10 +29,22 @@ def get_instances_availability(print_info=True):
                 formatted_instance_type = f"{Fore.GREEN}{formatted_instance_type}{Style.RESET_ALL}"
             available_instances[idx] = {
                 "name": instance_type,
-                "region": next(iter(instance_info["regions_with_capacity_available"]))
+                "region": next(iter(instance_info["regions_with_capacity_available"])),
+                "formatted_name": formatted_instance_type
             }
         else:
             unavailable_instances.append(f"{idx}. {formatted_instance_type}")
+
+    if print_info:
+        colored_print("\nAvailable", Fore.GREEN)
+        for number, info in available_instances.items():
+            print(f"{number}. {info['formatted_name']}")
+        colored_print("\nUnavailable", Fore.RED)
+        for instance in unavailable_instances:
+            print(instance)
+    
+    return available_instances
+
     
     if print_info:
         colored_print("\nAvailable", Fore.GREEN)
