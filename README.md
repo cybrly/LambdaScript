@@ -23,7 +23,7 @@ SSH_KEY_NAMES="your_key_names"
 python3 lambda.py -h                                                                                                                                 ─╯
 
     USAGE:
-        python script_name.py [COMMAND] [ARGUMENT]
+        python lambda.py [COMMAND] [ARGUMENT]
 
     COMMANDS:
         list                    List all available GPU instances.
