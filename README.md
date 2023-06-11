@@ -16,7 +16,7 @@ Update .env file:
 ```
 AUTH_TOKEN="your_token"
 SSH_KEY_NAMES="your_key_name"
-SSH_KEY_PATH = os.getenv('SSH_KEY_PATH')
+SSH_KEY_PATH ="SSH_KEY_PATH"
 ```
 
 # Usage
