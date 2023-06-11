@@ -3,22 +3,23 @@ import json
 import sys
 import os
 from dotenv import load_dotenv
-from colorama import Fore, Back, Style
+from colorama import Fore, Style
+
+load_dotenv()
+AUTH_TOKEN = os.getenv('AUTH_TOKEN')
+SSH_KEY_NAMES = os.getenv('SSH_KEY_NAMES')
+
+API_URL = "https://cloud.lambdalabs.com/api/v1/"
 
 def colored_print(text, color):
     print(f"{color}{text}{Style.RESET_ALL}")
 
-load_dotenv()
-AUTH_TOKEN = os.getenv('AUTH_TOKEN')
-SSH_KEY_NAMES = os.getenv('ssh_key_names')
-
-API_URL = "https://cloud.lambdalabs.com/api/v1/"
-
-def get_available_instances():
+def get_instances_availability(print_info=True):
     response = requests.get(API_URL + "instance-types", headers={"Authorization": f"Bearer {AUTH_TOKEN}"})
     data = response.json()["data"]
     available_instances = {}
     unavailable_instances = []
+    
     for idx, (instance_type, instance_info) in enumerate(data.items(), start=1):
         formatted_instance_type = ' '.join(part.capitalize() for part in instance_type.replace('gpu_', '').split('_'))
         if instance_info["regions_with_capacity_available"]:
@@ -30,47 +31,27 @@ def get_available_instances():
             }
         else:
             unavailable_instances.append(f"{idx}. {formatted_instance_type}")
-            
-    colored_print("\nAvailable", Fore.GREEN)
-    for number, info in available_instances.items():
-        print(f"{number}. {info['name']}")
-    colored_print("\nUnavailable", Fore.RED)
-    for instance in unavailable_instances:
-        print(instance)
+    
+    if print_info:
+        colored_print("\nAvailable", Fore.GREEN)
+        for number, info in available_instances.items():
+            print(f"{number}. {info['name']}")
+        colored_print("\nUnavailable", Fore.RED)
+        for instance in unavailable_instances:
+            print(instance)
     
     return available_instances
 
-
-def get_available_instance_data():
-    response = requests.get(API_URL + "instance-types", headers={"Authorization": f"Bearer {AUTH_TOKEN}"})
-    data = response.json()["data"]
-    available_instances = {}
-    unavailable_instances = []
-    for idx, (instance_type, instance_info) in enumerate(data.items(), start=1):
-        formatted_instance_type = ' '.join(part.capitalize() for part in instance_type.replace('gpu_', '').split('_'))
-        if instance_info["regions_with_capacity_available"]:
-            if '8x' in instance_type:
-                formatted_instance_type = f"{Fore.GREEN}{formatted_instance_type}{Style.RESET_ALL}"
-            available_instances[idx] = {
-                "name": instance_type,
-                "region": next(iter(instance_info["regions_with_capacity_available"]))['name'] if instance_info["regions_with_capacity_available"] else None
-            }
-        else:
-            unavailable_instances.append(f"{idx}. {formatted_instance_type}")
-    return available_instances
-
-
 def start_instance(number):
-    instance_info = get_available_instance_data().get(number)
+    instance_info = get_instances_availability(print_info=False).get(number)
     if instance_info is None:
         colored_print(f"\nThe number you provided does not correspond to an available GPU. Try again.", Fore.RED)
         sys.exit(1)
 
     data = {
-        # Just use the region value directly, since it's now a string
         "region_name": instance_info["region"],
         "instance_type_name": instance_info["name"],
-        "ssh_key_names": os.getenv('SSH_KEY_NAMES').split(',')
+        "ssh_key_names": SSH_KEY_NAMES.split(',')
     }
 
     response = requests.post(API_URL + "instance-operations/launch", headers={"Authorization": f"Bearer {AUTH_TOKEN}"}, json=data)
@@ -79,7 +60,6 @@ def start_instance(number):
     else:
         error_response = response.json()
         colored_print(f"\nFailed to start GPU instance. Error Code: {error_response['error']['code']}, Error Message: {error_response['error']['message']}", Fore.RED)
-
 
 def check_running_instances():
     response = requests.get(API_URL + "instances", headers={"Authorization": f"Bearer {AUTH_TOKEN}"})
@@ -125,7 +105,7 @@ def print_help_menu():
     """
     print(help_text)
 
-if __name__ == "__main__":
+def main():
     if len(sys.argv) < 2 or sys.argv[1].lower() in ["-h", "--help"]:
         print_help_menu()
         sys.exit(0)
@@ -144,7 +124,10 @@ if __name__ == "__main__":
             sys.exit(1)
         stop_instance(sys.argv[2])
     elif command == "list":
-        get_available_instances()
+        get_instances_availability()
     else:
         print(f"Unknown command: {command}. Use 'check', 'start', 'stop' or 'list'")
         sys.exit(1)
+
+if __name__ == "__main__":
+    main()
