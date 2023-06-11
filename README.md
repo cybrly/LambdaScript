@@ -31,3 +31,5 @@ python3 lambda.py -h                                                            
         stop <instance_id>  Terminate the instance with the given instance id.
         list                List all available GPU instances.
 ```
+# Demo
+[![asciicast](https://asciinema.org/a/590817.svg)](https://asciinema.org/a/590817)
