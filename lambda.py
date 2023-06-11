@@ -49,7 +49,8 @@ def start_instance(number):
         sys.exit(1)
 
     data = {
-        "region_name": instance_info["region"],
+        # Assume the region info is a dictionary and use the 'name' field
+        "region_name": instance_info["region"]['name'],
         "instance_type_name": instance_info["name"],
         "ssh_key_names": SSH_KEY_NAMES.split(',')
     }
