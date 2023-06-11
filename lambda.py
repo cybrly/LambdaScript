@@ -109,7 +109,7 @@ def connect_instance(instance_id):
 def print_help_menu():
     help_text = """
     USAGE:
-        python script_name.py [COMMAND] [ARGUMENT]
+        python lambda.py [COMMAND] [ARGUMENT]
 
     COMMANDS:
         list                    List all available GPU instances.
