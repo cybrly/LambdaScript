@@ -8,6 +8,8 @@ from colorama import Fore, Style
 load_dotenv()
 AUTH_TOKEN = os.getenv('AUTH_TOKEN')
 SSH_KEY_NAMES = os.getenv('SSH_KEY_NAMES')
+SSH_KEY_PATH = os.getenv('SSH_KEY_PATH')
+
 
 API_URL = "https://cloud.lambdalabs.com/api/v1/"
 
@@ -92,16 +94,29 @@ def stop_instance(instance_id):
         error_code = response.json()["error"]["code"]
         colored_print(f"\nFailed to terminate instance. Error Message: {error_code}",Fore.RED)
 
+def connect_instance(instance_id):
+    # Get the instance information
+    response = requests.get(API_URL + "instances", headers={"Authorization": f"Bearer {AUTH_TOKEN}"})
+    data = response.json()["data"]
+
+    for instance in data:
+        if instance['id'] == instance_id and instance['status'] == 'active':
+            os.system(f"ssh -i {SSH_KEY_PATH} ubuntu@{instance['ip']}")
+            break
+    else:
+        colored_print(f"No active instance found with id: {instance_id}", Fore.RED)
+
 def print_help_menu():
     help_text = """
     USAGE:
         python script_name.py [COMMAND] [ARGUMENT]
 
     COMMANDS:
-        check               Check the status of running instances.
-        start <number>      Start a GPU instance with the given number.
-        stop <instance_id>  Terminate the instance with the given instance id.
-        list                List all available GPU instances.
+        check                   Check the status of running instances.
+        start <number>          Start a GPU instance with the given number.
+        stop <instance_id>      Terminate the instance with the given instance id.
+        list                    List all available GPU instances.
+        connect <instance_id>   Open an SSH connection to the instance with the given instance id.
 
     """
     print(help_text)
@@ -126,8 +141,13 @@ def main():
         stop_instance(sys.argv[2])
     elif command == "list":
         get_instances_availability()
+    elif command == "connect":
+        if len(sys.argv) < 3:
+            print("Missing parameters for 'connect'. Use 'connect <instance_id>'")
+            sys.exit(1)
+        connect_instance(sys.argv[2])  # Now this line is correctly indented
     else:
-        print(f"Unknown command: {command}. Use 'check', 'start', 'stop' or 'list'")
+        print(f"Unknown command: {command}. Use 'check', 'start', 'stop', 'list', or 'connect'")
         sys.exit(1)
 
 if __name__ == "__main__":
