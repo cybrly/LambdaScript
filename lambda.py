@@ -104,7 +104,7 @@ def connect_instance(instance_id):
             os.system(f"ssh -i {SSH_KEY_PATH} ubuntu@{instance['ip']}")
             break
     else:
-        colored_print(f"No active instance found with id: {instance_id}", Fore.RED)
+        colored_print(f"\nNo active instance found with id: {instance_id}", Fore.RED)
 
 def print_help_menu():
     help_text = """
@@ -131,23 +131,23 @@ def main():
         check_running_instances()
     elif command == "start":
         if len(sys.argv) < 3:
-            print("Missing parameters for 'start'. Use 'start <number>'")
+            print(f"\nMissing parameters for 'start'. Use 'start <number>'")
             sys.exit(1)
         start_instance(int(sys.argv[2]))
     elif command == "stop":
         if len(sys.argv) < 3:
-            print("Missing parameters for 'stop'. Use 'stop <instance_id>'")
+            print(f"\nMissing parameters for 'stop'. Use 'stop <instance_id>'")
             sys.exit(1)
         stop_instance(sys.argv[2])
     elif command == "list":
         get_instances_availability()
     elif command == "connect":
         if len(sys.argv) < 3:
-            print("Missing parameters for 'connect'. Use 'connect <instance_id>'")
+            print(f"\nMissing parameters for 'connect'. Use 'connect <instance_id>'")
             sys.exit(1)
         connect_instance(sys.argv[2])  # Now this line is correctly indented
     else:
-        print(f"Unknown command: {command}. Use 'check', 'start', 'stop', 'list', or 'connect'")
+        print(f"\nUnknown command: {command}. Use 'check', 'start', 'stop', 'list', or 'connect'")
         sys.exit(1)
 
 if __name__ == "__main__":
