@@ -112,10 +112,10 @@ def print_help_menu():
         python script_name.py [COMMAND] [ARGUMENT]
 
     COMMANDS:
+        list                    List all available GPU instances.
         check                   Check the status of running instances.
         start <number>          Start a GPU instance with the given number.
         stop <instance_id>      Terminate the instance with the given instance id.
-        list                    List all available GPU instances.
         connect <instance_id>   Open an SSH connection to the instance with the given instance id.
 
     """
