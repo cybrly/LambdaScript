@@ -32,4 +32,7 @@ python3 lambda.py -h                                                            
         list                List all available GPU instances.
 ```
 # Demo
+
+alias gpu="python3 lambda.py"
+
 [![asciicast](https://asciinema.org/a/590817.svg)](https://asciinema.org/a/590817)
