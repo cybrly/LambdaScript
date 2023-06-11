@@ -85,7 +85,7 @@ def check_running_instances():
     response = requests.get(API_URL + "instances", headers={"Authorization": f"Bearer {AUTH_TOKEN}"})
     data = response.json()["data"]
     if not data:
-        colored_print(f"There are no instances currently running. \n",Fore.RED)
+        colored_print(f"\nThere are no instances currently running. \n",Fore.RED)
         return
 
     for instance in data:
