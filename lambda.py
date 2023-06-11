@@ -14,9 +14,6 @@ SSH_KEY_NAMES = os.getenv('ssh_key_names')
 
 API_URL = "https://cloud.lambdalabs.com/api/v1/"
 
-def print_in_color(text, color_code):
-    print(f"\033[{color_code}m{text}\033[0m")
-
 def get_available_instances():
     response = requests.get(API_URL + "instance-types", headers={"Authorization": f"Bearer {AUTH_TOKEN}"})
     data = response.json()["data"]
@@ -29,7 +26,7 @@ def get_available_instances():
                 formatted_instance_type = f"{Fore.GREEN}{formatted_instance_type}{Style.RESET_ALL}"
             available_instances[idx] = {
                 "name": instance_type,
-                "region": next(iter(instance_info["regions_with_capacity_available"]), 'us-west-2')
+                "region": next(iter(instance_info["regions_with_capacity_available"]))
             }
         else:
             unavailable_instances.append(f"{idx}. {formatted_instance_type}")
@@ -55,7 +52,7 @@ def get_instance_info(number):
 def start_instance(number):
     gpu_info = get_instance_info(number)
     if not gpu_info["region"]:
-        colored_print("The selected instance does not have an available region.", Fore.RED)
+        colored_print(f"\nThe selected instance does not have an available region.", Fore.RED)
         sys.exit(1)
     data = {
         "region_name": str(gpu_info["region"]["name"]),
@@ -64,10 +61,10 @@ def start_instance(number):
     }
     response = requests.post(API_URL + "instance-operations/launch", headers={"Authorization": f"Bearer {AUTH_TOKEN}"}, json=data)
     if response.status_code == 200:
-        colored_print("GPU instance started successfully.", Fore.GREEN)
+        colored_print(f"\nGPU instance started successfully.", Fore.GREEN)
     else:
         error_response = response.json()
-        colored_print(f"Failed to start GPU instance. Error Code: {error_response['error']['code']}, Error Message: {error_response['error']['message']}", Fore.RED)
+        colored_print(f"\nFailed to start GPU instance. Error Code: {error_response['error']['code']}, Error Message: {error_response['error']['message']}", Fore.RED)
 
 
 def stop_instance(instance_id):
@@ -80,26 +77,26 @@ def stop_instance(instance_id):
 
     response = requests.post(url, headers=headers, data=json.dumps(payload))
     if response.status_code == 200:
-        print("\033[1;32mInstance terminated successfully.\033[0m")
+        colored_print(f"\nInstance terminated successfully.",Fore.GREEN)
     else:
         error_code = response.json()["error"]["code"]
-        print(f"\033[1;31mFailed to terminate instance. Error Message: {error_code}\033[0m")
+        colored_print(f"\nFailed to terminate instance. Error Message: {error_code}",Fore.RED)
 
 
 def check_running_instances():
     response = requests.get(API_URL + "instances", headers={"Authorization": f"Bearer {AUTH_TOKEN}"})
     data = response.json()["data"]
     if not data:
-        print("\033[1;31;40m There are no instances currently running. \n")
+        colored_print(f"There are no instances currently running. \n",Fore.RED)
         return
 
     for instance in data:
         if instance['status'] == 'active':
             instance_type = ' '.join(part.capitalize() for part in instance['instance_type']['name'].replace('gpu_', '').split('_'))
-            print("\n\033[1;34;40m Instance ID: \033[0m" + instance['id'],
-                  "\033[1;34;40m Instance Type: \033[0m" + instance_type,
-                  "\033[1;34;40m IP Address: \033[0m" + instance['ip'],
-                  "\033[1;34;40m Status: \033[1;32;40m" + instance['status'] + "\n", sep='\n')
+            print(f"\n{Fore.BLUE}Instance ID:{Style.RESET_ALL} {instance['id']}")
+            print(f"{Fore.BLUE}Instance Type:{Style.RESET_ALL} {instance_type}")
+            print(f"{Fore.BLUE}IP Address:{Style.RESET_ALL} {instance['ip']}")
+            print(f"{Fore.BLUE}Status:{Fore.GREEN} {instance['status']}{Style.RESET_ALL}\n")
 
 
 def print_help_menu():
