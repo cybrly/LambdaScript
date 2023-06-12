@@ -5,6 +5,7 @@ import os
 import time
 from dotenv import load_dotenv
 from colorama import Fore, Style
+from datetime import timedelta
 
 load_dotenv()
 AUTH_TOKEN = os.getenv('AUTH_TOKEN')
@@ -116,18 +117,30 @@ def connect_instance(instance_id):
     else:
         colored_print(f"\nNo active instance found with id: {instance_id}", Fore.RED)
 
-import time
+def countdown(t):
+    while t:
+        mins, secs = divmod(t, 60)
+        timeformat = '{:02d}:{:02d}'.format(mins, secs)
+        print(timeformat, end='\r')
+        time.sleep(1)
+        t -= 1
 
 def hashcat():
-    instance_name_target = 'gpu_8x_a100'
+    print("Checking for 8x A100 availability...")
     while True:
         available_instances = get_instances_availability(print_info=False)
-        for info in available_instances.values():
-            if info['name'] == instance_name_target:
-                start_instance(info['name'])
-                colored_print(f"\nInstance {instance_name_target} started successfully.", Fore.GREEN)
-                return
-        time.sleep(60)  # check availability every minute
+        for idx, info in available_instances.items():
+            if '8x_a100' in info['name']:
+                print("8x A100 is now available. Starting instance...")
+                start_instance(idx)
+                time.sleep(30)
+                print("Instance booting...")
+                countdown(5*60)  # countdown for 5 minutes
+                check_running_instances()  # check running instances after 5 minutes
+                return  # exit function once instance started
+        print("No instances currently available. Checking again in 60 seconds...")
+        countdown(60)  # countdown for 60 seconds before checking again
+
 
 def print_help_menu():
     help_text = """
