@@ -44,15 +44,14 @@ def get_instances_availability(print_info=True):
             unavailable_instances.append(f"{idx}. {formatted_instance_type}")
 
     if print_info:
-        colored_print("\nAvailable", Fore.GREEN)
-        for number, info in available_instances.items():
-            print(f"{number}. {info['formatted_name']}, ${info['price']}/hr")
-        colored_print("\nUnavailable", Fore.RED)
-        for instance in unavailable_instances:
-            print(instance)
+        if available_instances:
+            colored_print("\nAvailable:", Fore.GREEN)
+            for number, info in available_instances.items():
+                print(f"{number}. {info['formatted_name']}, ${info['price']}/hr")
+        else:
+            colored_print("There are currently no instances available.", Fore.RED)
     
     return available_instances
-
 
 def start_instance(number):
     instance_info = get_instances_availability(print_info=False).get(number)
