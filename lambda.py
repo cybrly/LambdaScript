@@ -46,7 +46,7 @@ def get_instances_availability(print_info=True):
     if print_info:
         colored_print("\nAvailable", Fore.GREEN)
         for number, info in available_instances.items():
-            print(f"{number}. {info['formatted_name']}, ${info['price']} per hour")
+            print(f"{number}. {info['formatted_name']}, ${info['price']}/hr")
         colored_print("\nUnavailable", Fore.RED)
         for instance in unavailable_instances:
             print(instance)
