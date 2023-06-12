@@ -123,23 +123,24 @@ def countdown(t, status_message, color):
     while t:
         mins, secs = divmod(t, 60)
         timeformat = '{:02d}:{:02d}'.format(mins, secs)
-        print(f"{color}{status_message} {timeformat}{Style.RESET_ALL}", end='\r')
+        print(f"\033[K{color}{status_message} {timeformat}{Style.RESET_ALL}", end='\r')
         time.sleep(1)
         t -= 1
 
 def hashcat():
     while True:
-        os.system('cls' if os.name == 'nt' else 'clear')  # clear the console
         print(Fore.GREEN + "Checking for 8x A100 availability..." + Style.RESET_ALL)
         available_instances = get_instances_availability(print_info=False)
         for idx, info in available_instances.items():
             if '8x_a100' in info['name']:
+                print('\033[K', end='\r')  # Clear current line
                 print(Fore.GREEN + "8x A100 is now available. Starting instance." + Style.RESET_ALL)
                 start_instance(idx)
                 time.sleep(30)
+                print('\033[K', end='\r')  # Clear current line
                 print(Fore.GREEN + "Instance initializing. Please wait." + Style.RESET_ALL)
-                countdown(5*60, "Instance ready in:", Fore.GREEN)  # countdown for 5 minutes
-                check_running_instances()  # check running instances after 5 minutes
+                countdown(15*60, "Instance ready in:", Fore.GREEN)  # countdown for 15 minutes
+                check_running_instances()  # check running instances after 15 minutes
                 return  # exit function once instance started
         countdown(60, "No instances currently available. Checking again in:", Fore.RED)  # countdown for 60 seconds before checking again
 
