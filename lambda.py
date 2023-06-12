@@ -2,6 +2,7 @@ import requests
 import json
 import sys
 import os
+import time
 from dotenv import load_dotenv
 from colorama import Fore, Style
 
@@ -115,6 +116,19 @@ def connect_instance(instance_id):
     else:
         colored_print(f"\nNo active instance found with id: {instance_id}", Fore.RED)
 
+import time
+
+def hashcat():
+    instance_name_target = 'gpu_8x_a100'
+    while True:
+        available_instances = get_instances_availability(print_info=False)
+        for info in available_instances.values():
+            if info['name'] == instance_name_target:
+                start_instance(info['name'])
+                colored_print(f"\nInstance {instance_name_target} started successfully.", Fore.GREEN)
+                return
+        time.sleep(60)  # check availability every minute
+
 def print_help_menu():
     help_text = """
     USAGE:
@@ -126,9 +140,10 @@ def print_help_menu():
         start <number>          Start a GPU instance with the given number.
         stop <instance_id>      Terminate the instance with the given instance id.
         connect <instance_id>   Open an SSH connection to the instance with the given instance id.
-
+        hashcat                 Continuously check for 'gpu_8x_a100' availability, and start it as soon as it becomes available.
     """
     print(help_text)
+
 
 def main():
     if len(sys.argv) < 2 or sys.argv[1].lower() in ["-h", "--help"]:
@@ -154,10 +169,13 @@ def main():
         if len(sys.argv) < 3:
             print(f"\nMissing parameters for 'connect'. Use 'connect <instance_id>'")
             sys.exit(1)
-        connect_instance(sys.argv[2])  # Now this line is correctly indented
+        connect_instance(sys.argv[2])
+    elif command == "hashcat":
+        hashcat()
     else:
-        print(f"\nUnknown command: {command}. Use 'check', 'start', 'stop', 'list', or 'connect'")
+        print(f"\nUnknown command: {command}. Use 'check', 'start', 'stop', 'list', 'connect', or 'hashcat'")
         sys.exit(1)
 
 if __name__ == "__main__":
     main()
+
