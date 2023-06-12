@@ -27,10 +27,18 @@ def get_instances_availability(print_info=True):
         if instance_info["regions_with_capacity_available"]:
             if '8x' in instance_type:
                 formatted_instance_type = f"{Fore.GREEN}{formatted_instance_type}{Style.RESET_ALL}"
+            
+            price = instance_info["instance_type"].get("price_cents_per_hour")
+            if price is not None:
+                price = "{:.2f}".format(price / 100)  # converts cents to dollars
+            else:
+                price = "Unknown"
+                
             available_instances[idx] = {
                 "name": instance_type,
                 "region": next(iter(instance_info["regions_with_capacity_available"])),
-                "formatted_name": formatted_instance_type
+                "formatted_name": formatted_instance_type,
+                "price": price
             }
         else:
             unavailable_instances.append(f"{idx}. {formatted_instance_type}")
@@ -38,23 +46,13 @@ def get_instances_availability(print_info=True):
     if print_info:
         colored_print("\nAvailable", Fore.GREEN)
         for number, info in available_instances.items():
-            print(f"{number}. {info['formatted_name']}")
+            print(f"{number}. {info['formatted_name']}, ${info['price']} per hour")
         colored_print("\nUnavailable", Fore.RED)
         for instance in unavailable_instances:
             print(instance)
     
     return available_instances
 
-    
-    if print_info:
-        colored_print("\nAvailable", Fore.GREEN)
-        for number, info in available_instances.items():
-            print(f"{number}. {info['name']}")
-        colored_print("\nUnavailable", Fore.RED)
-        for instance in unavailable_instances:
-            print(instance)
-    
-    return available_instances
 
 def start_instance(number):
     instance_info = get_instances_availability(print_info=False).get(number)
