@@ -33,8 +33,3 @@ python3 lambda.py -h                                                            
         connect <instance_id>   Open an SSH connection to the instance with the given instance id.
         hashcat                 Continuously check for 'gpu_8x_a100' availability, and start it as soon as it becomes available.
 ```
-# Demo
-
-alias gpu="python3 lambda.py"
-
-[![asciicast](https://asciinema.org/a/590817.svg)](https://asciinema.org/a/590817)
